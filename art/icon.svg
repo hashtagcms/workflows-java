@@ -1,0 +1,19 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HashtagCMS Workflows icon">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="0.55" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="256" height="256" rx="60" fill="url(#tile)"/>
+
+  <g transform="translate(52,52) scale(1.28)">
+    <path d="M46 60 C64 60 66 40 82 40" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-opacity="0.95"/>
+    <path d="M46 60 C64 60 66 80 82 80" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-opacity="0.6"/>
+    <circle cx="36" cy="60" r="11" fill="#ffffff"/>
+    <circle cx="90" cy="40" r="8" fill="#ffffff"/>
+    <circle cx="90" cy="80" r="8" fill="#ffffff" fill-opacity="0.65"/>
+  </g>
+</svg>
