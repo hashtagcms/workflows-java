@@ -6,6 +6,25 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Preview (dry-run) API** — `POST {route-prefix}/admin/workflows/preview` runs
+  an unsaved `config` through the engine (validation + directive negotiation)
+  with no persistence.
+- **Workflow catalog API** — `GET {route-prefix}/public/workflows/v1/catalog`
+  returns each workflow's alias, expected inputs, and emitted directive types.
+- **Audit-log read API** — `GET/DELETE {route-prefix}/admin/logs` (newest-first,
+  paginated, filterable by `alias`).
+- **Docker packaging** — multi-stage, non-root, multi-arch (amd64 + arm64) image
+  with a built-in `HEALTHCHECK`; `docker-compose.yml` that runs on H2 by default
+  and connects to your own running MySQL via `.env` (standalone or `shared`);
+  `.env.example`; and a multi-arch `docker/build-and-push.sh`. See
+  [docs/docker.md](docs/docker.md).
+
+### Fixed
+- `WorkflowService.isDeclarative()` now recognizes configs that carry only
+  `on_success` / `on_failure` branches (previously mis-routed to the handler
+  path).
+
 ## [1.0.0] — 2026-08-29
 
 First public release. A Spring Boot auto-configuration library that ports the

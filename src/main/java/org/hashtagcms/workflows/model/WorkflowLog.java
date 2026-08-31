@@ -68,16 +68,30 @@ public class WorkflowLog {
     }
 
     public Long getId() { return id; }
+    public String getWorkflowAlias() { return workflowAlias; }
     public void setWorkflowAlias(String v) { this.workflowAlias = v; }
+    public Long getSiteId() { return siteId; }
     public void setSiteId(Long v) { this.siteId = v; }
+    public Long getUserId() { return userId; }
     public void setUserId(Long v) { this.userId = v; }
+    public String getSessionId() { return sessionId; }
     public void setSessionId(String v) { this.sessionId = v; }
+    public Map<String, Object> getPayload() { return payload; }
     public void setPayload(Map<String, Object> v) { this.payload = v; }
+    public List<Object> getResponseDirectives() { return responseDirectives; }
     public void setResponseDirectives(List<Object> v) { this.responseDirectives = v; }
+    public Map<String, Object> getNegotiation() { return negotiation; }
     public void setNegotiation(Map<String, Object> v) { this.negotiation = v; }
+    public boolean isSuccess() { return success; }
     public void setSuccess(boolean v) { this.success = v; }
+    public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String v) { this.errorMessage = v; }
+    public int getExecutionTimeMs() { return executionTimeMs; }
     public void setExecutionTimeMs(long v) { this.executionTimeMs = (int) v; }
+    public String getClientPlatform() { return clientPlatform; }
     public void setClientPlatform(String v) { this.clientPlatform = v; }
+    public String getClientAppVersion() { return clientAppVersion; }
     public void setClientAppVersion(String v) { this.clientAppVersion = v; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 }

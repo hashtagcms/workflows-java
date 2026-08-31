@@ -48,9 +48,10 @@ Everything hangs off `route-prefix` (default `/api/hashtagcms`):
 
 | Prefix | Routes |
 |---|---|
-| `{route-prefix}/public/workflows/v1` | `POST /execute`, `GET /health`, `GET /directives` |
-| `{route-prefix}/admin/workflows` | CRUD workflows |
+| `{route-prefix}/public/workflows/v1` | `POST /execute`, `GET /health`, `GET /directives`, `GET /catalog` |
+| `{route-prefix}/admin/workflows` | CRUD workflows, `POST /preview` (dry-run) |
 | `{route-prefix}/admin/directives` | CRUD the directive manifest |
+| `{route-prefix}/admin/logs` | Read/prune the audit log (`GET` list, `GET/{id}`, `DELETE/{id}`) |
 
 This mirrors the PHP package's `hashtagcmsapi.route_prefix`, so a Java service and
 a PHP service can present identical URLs.

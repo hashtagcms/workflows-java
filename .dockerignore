@@ -1,10 +1,16 @@
 target/
 .git/
 .gitignore
+.github/
 .idea/
 *.iml
 .vscode/
 docs/
+art/
 *.md
 Dockerfile
 .dockerignore
+docker-compose.yml
+docker/
+.env
+.env.*

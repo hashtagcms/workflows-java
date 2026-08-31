@@ -117,6 +117,7 @@ public class WorkflowService {
 
     private boolean isDeclarative(Map<String, Object> config) {
         return config != null && (config.containsKey("target") || config.containsKey("directives")
+                || config.containsKey("on_success") || config.containsKey("on_failure")
                 || config.containsKey("validation") || config.containsKey("rules") || config.containsKey("steps"));
     }
 

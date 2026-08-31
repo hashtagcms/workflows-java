@@ -5,6 +5,7 @@ import org.hashtagcms.workflows.config.WorkflowProperties;
 import org.hashtagcms.workflows.engine.DirectiveNegotiator;
 import org.hashtagcms.workflows.security.UnauthorizedException;
 import org.hashtagcms.workflows.security.WorkflowUserResolver;
+import org.hashtagcms.workflows.service.WorkflowCatalog;
 import org.hashtagcms.workflows.service.WorkflowHandlerRegistry;
 import org.hashtagcms.workflows.service.WorkflowService;
 import org.hashtagcms.workflows.web.dto.ExecuteRequest;
@@ -28,15 +29,17 @@ public class WorkflowExecutionController {
     private final WorkflowHandlerRegistry handlers;
     private final WorkflowProperties properties;
     private final WorkflowUserResolver userResolver;
+    private final WorkflowCatalog catalog;
 
     public WorkflowExecutionController(WorkflowService workflowService, DirectiveNegotiator negotiator,
                                        WorkflowHandlerRegistry handlers, WorkflowProperties properties,
-                                       WorkflowUserResolver userResolver) {
+                                       WorkflowUserResolver userResolver, WorkflowCatalog catalog) {
         this.workflowService = workflowService;
         this.negotiator = negotiator;
         this.handlers = handlers;
         this.properties = properties;
         this.userResolver = userResolver;
+        this.catalog = catalog;
     }
 
     @PostMapping("/execute")
@@ -105,5 +108,11 @@ public class WorkflowExecutionController {
                                           @RequestParam(name = "platform", required = false) String platform,
                                           @RequestParam(name = "app_version", required = false) String appVersion) {
         return Map.of("success", true, "directives", negotiator.catalog(siteId, platform, appVersion));
+    }
+
+    /** The workflow contract for a site: each workflow's alias, expected payload keys, and emitted directive types. */
+    @GetMapping("/catalog")
+    public Map<String, Object> catalog(@RequestParam(name = "site_id", defaultValue = "1") long siteId) {
+        return Map.of("success", true, "site_id", siteId, "workflows", catalog.forSite(siteId));
     }
 }

@@ -25,4 +25,7 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
                            @Param("siteId") Long siteId);
 
     Optional<Workflow> findBySiteIdAndAlias(Long siteId, String alias);
+
+    /** All published workflows for a site (for the workflow catalog / contract). */
+    List<Workflow> findBySiteIdAndPublishStatusTrueOrderByAliasAsc(Long siteId);
 }

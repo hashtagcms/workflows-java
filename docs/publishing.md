@@ -2,6 +2,10 @@
 
 [← Docs index](README.md)
 
+> Publishing the **container image** instead? See [Docker → Publishing multi-arch
+> images](docker.md#publishing-multi-arch-images). Keep the image tag, this
+> library version, and the Git tag in lockstep.
+
 This library is released to **Maven Central** through the
 [Sonatype Central Portal](https://central.sonatype.com). The `pom.xml` already
 carries the required metadata (name, description, URL, license, developers, SCM)

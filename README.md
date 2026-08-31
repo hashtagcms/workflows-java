@@ -23,8 +23,9 @@ standalone as a ready-made microservice.
 - **Requirements:** Java 21+, Spring Boot 3.x. A JDBC datasource (the host app's
   choice; the standalone runner uses in-memory H2).
 - **Documentation:** see the [`docs/`](docs/) guides — [Getting started](docs/getting-started.md),
-  [Configuration](docs/configuration.md), [Authentication & SSO](docs/authentication.md),
-  [Extending](docs/extending.md), [Publishing](docs/publishing.md).
+  [Configuration](docs/configuration.md), [Docker](docs/docker.md),
+  [Authentication & SSO](docs/authentication.md), [Extending](docs/extending.md),
+  [Publishing](docs/publishing.md).
 
 ## Installation
 
@@ -46,6 +47,30 @@ Add the dependency (JDBC driver is yours to choose):
 implementation 'org.hashtagcms:workflows:1.0.0'
 ```
 
+The artifact is on **Maven Central** — no extra repository config needed. Add a
+**JDBC driver** too (the library ships none — it's your choice) and point Spring at
+your database:
+
+```xml
+<dependency>
+  <groupId>com.mysql</groupId>
+  <artifactId>mysql-connector-j</artifactId>
+  <scope>runtime</scope>
+</dependency>
+```
+
+```yaml
+# application.yml — any database Hibernate supports (MySQL, PostgreSQL, H2, …)
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/workflows
+    username: app
+    password: secret
+  jpa:
+    hibernate:
+      ddl-auto: update      # update = Java owns the schema; validate = sharing PHP's
+```
+
 That's all the wiring there is. On startup the library's
 [auto-configuration](src/main/java/org/hashtagcms/workflows/autoconfigure/WorkflowsAutoConfiguration.java)
 registers the engine, the REST controllers, the directive manifest, seeding, and
@@ -63,13 +88,58 @@ No global Maven needed — the **Maven Wrapper** (`./mvnw`) downloads it on firs
 ```bash
 ./mvnw spring-boot:run
 # or build the runnable jar (attached under the `exec` classifier):
-./mvnw clean package && java -jar target/workflows-1.0.0-SNAPSHOT-exec.jar
+./mvnw clean package && java -jar target/workflows-1.0.0-exec.jar
 ```
 
 On startup it seeds the **72-directive manifest** and a few **example workflows**
 (H2). The service listens on `http://localhost:8080`. (The plain
-`target/workflows-1.0.0-SNAPSHOT.jar` is the library artifact consumers depend on;
+`target/workflows-1.0.0.jar` is the library artifact consumers depend on;
 the `-exec.jar` is the self-contained runnable one.)
+
+## Run with Docker
+
+The image is published to **Docker Hub** as `hashtagcms/workflows` (also on GHCR as
+`ghcr.io/hashtagcms/workflows`). Each release is tagged with its exact version and
+`latest` — **pin the version in production**. It runs standalone on in-memory H2
+out of the box — nothing else to install.
+
+```bash
+docker pull hashtagcms/workflows:1.0.0
+docker run --rm -p 8080:8080 hashtagcms/workflows:1.0.0
+# then:  curl http://localhost:8080/api/hashtagcms/public/workflows/v1/health
+```
+
+**Connect a database.** The default H2 is in-memory (data is lost on restart). The
+image bundles the **H2** and **MySQL** drivers; point it at MySQL with env vars:
+
+```bash
+# Standalone, Java owns the schema (created + seeded automatically):
+docker run --rm -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL='jdbc:mysql://db-host:3306/workflows?useSSL=false&allowPublicKeyRetrieval=true' \
+  -e SPRING_DATASOURCE_USERNAME=workflows -e SPRING_DATASOURCE_PASSWORD=secret \
+  -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
+  hashtagcms/workflows:1.0.0
+
+# Or alongside the PHP app, on the tables PHP owns (validate-only, no seeding):
+docker run --rm -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=shared \
+  -e DB_URL='jdbc:mysql://host.docker.internal:3306/v30?useSSL=false&allowPublicKeyRetrieval=true' \
+  -e DB_USERNAME=root -e DB_PASSWORD=secret \
+  hashtagcms/workflows:1.0.0
+```
+
+Or build and run it from source with Compose. It connects to a MySQL you already
+run (it doesn't start its own) — copy `.env.example` to `.env`, pick a datasource
+option, then:
+
+```bash
+docker compose up --build            # H2 with no .env; your running MySQL when .env is set
+```
+
+The image is non-root, multi-arch (amd64 + arm64), with a built-in `HEALTHCHECK`.
+For PostgreSQL/MariaDB, other databases, and every env var, see
+[Docker](docs/docker.md) (or embed the [Maven library](#installation) with your own
+driver).
 
 ## Public API
 
@@ -80,6 +150,7 @@ Base path: `/api/hashtagcms/public/workflows/v1` (configurable).
 | `POST` | `/execute` | Execute a workflow and return client directives. |
 | `GET`  | `/health` | Liveness + registered handlers. |
 | `GET`  | `/directives` | The directive capability manifest (filter with `?platform=&app_version=`). |
+| `GET`  | `/catalog` | The workflow contract for a site (`?site_id=`): each workflow's alias, expected inputs, and emitted directive types. |
 
 **Execute** request:
 
@@ -110,7 +181,9 @@ curl -X POST 'http://localhost:8080/api/hashtagcms/public/workflows/v1/execute' 
 | Path | Purpose |
 |---|---|
 | `/api/hashtagcms/admin/workflows` | CRUD workflows (GET list, GET/{id}, POST, PUT/{id}, DELETE/{id}). |
+| `/api/hashtagcms/admin/workflows/preview` | `POST` — dry-run an unsaved `config` through the engine (validation + negotiation), no persistence. Body: `{ config, payload, platform, app_version, site_id, capabilities }`. |
 | `/api/hashtagcms/admin/directives` | CRUD the directive manifest. |
+| `/api/hashtagcms/admin/logs` | Audit log — `GET` list (newest-first, paginated: `?alias=&page=&size=`), `GET/{id}`, `DELETE/{id}`. |
 
 ## Concepts
 
@@ -222,7 +295,7 @@ engine/         WorkflowEngine, WorkflowResponse, WorkflowContext,
 model/          JPA entities (Workflow, WorkflowDirective, WorkflowLog, User, …) + JSON converters
 repository/     Spring Data repositories
 security/       WorkflowUserResolver + header/sanctum/jwt drivers
-service/        WorkflowService (orchestration + logging), DirectiveManifest, SeedService
+service/        WorkflowService (orchestration + logging), DirectiveManifest, WorkflowCatalog, SeedService
 web/            REST controllers (public API + management)
 config/         @ConfigurationProperties + startup seeding + env wiring
 ```

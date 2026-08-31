@@ -1,0 +1,42 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HashtagCMS Workflows">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A1448"/>
+      <stop offset="0.55" stop-color="#211858"/>
+      <stop offset="1" stop-color="#2C1E6B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="640" cy="210" r="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="0.55" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1280" height="640" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1280" height="640" fill="url(#glow)"/>
+
+  <!-- Icon (node-branch, no arrow / no #), centered near the top -->
+  <g transform="translate(552,86) scale(0.688)">
+    <rect x="0" y="0" width="256" height="256" rx="60" fill="url(#tile)"/>
+    <g transform="translate(52,52) scale(1.28)">
+      <path d="M46 60 C64 60 66 40 82 40" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-opacity="0.95"/>
+      <path d="M46 60 C64 60 66 80 82 80" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-opacity="0.6"/>
+      <circle cx="36" cy="60" r="11" fill="#ffffff"/>
+      <circle cx="90" cy="40" r="8" fill="#ffffff"/>
+      <circle cx="90" cy="80" r="8" fill="#ffffff" fill-opacity="0.65"/>
+    </g>
+  </g>
+
+  <!-- Wordmark + eyebrow + tagline, centered -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">
+    <text x="640" y="418" font-size="104" font-weight="800" fill="#ffffff" letter-spacing="-1.5">Workflows</text>
+    <text x="640" y="466" font-size="27" font-weight="600" fill="#C4B5FD" letter-spacing="7">HASHTAGCMS</text>
+    <text x="640" y="512" font-size="26" font-weight="400" fill="#B9C0D4" letter-spacing="0.2">Server-driven action orchestration engine</text>
+    <text x="640" y="566" font-size="20" font-weight="500" fill="#8B93B5" letter-spacing="1.5">Java · Spring Boot · API-only · MIT</text>
+  </g>
+</svg>

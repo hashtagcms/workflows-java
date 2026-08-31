@@ -1,0 +1,29 @@
+# HashtagCMS Workflows (Java) — local Docker Compose.
+#
+#   docker compose up --build     # run the service (reads .env if present)
+#
+# Database: this does NOT start its own MySQL. By default the service runs on
+# in-memory H2 (self-contained, data lost on restart). To use YOUR OWN running
+# MySQL/database, copy .env.example to .env and fill in the datasource settings —
+# reach a MySQL container that publishes 3306 on the host via
+# `host.docker.internal:3306` (already mapped below for Linux too).
+
+services:
+  workflows:
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-1.0.0}
+    image: hashtagcms/workflows:${VERSION:-1.0.0}
+    container_name: hashtagcms-workflows
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    # All runtime config comes from .env when present (datasource, profile, etc.).
+    # Optional, so a plain `docker compose up` with no .env still runs on H2.
+    env_file:
+      - path: .env
+        required: false
+    # Lets the container reach a database published on the host (any OS).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

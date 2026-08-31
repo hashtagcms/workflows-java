@@ -112,6 +112,28 @@ Key ideas:
 - **Directives** use the flat envelope (`{ "type": ..., ...fields }`) and are
   negotiated per client platform / app version before returning.
 
+## 5. Try, inspect, and audit — over REST
+
+Because there's no admin UI, the same things the PHP admin screens did are exposed
+as REST endpoints:
+
+- **Preview (dry-run)** — run an unsaved `config` through the full engine
+  (validation + negotiation) without persisting anything, to check it before you
+  save:
+
+  ```bash
+  curl -X POST 'http://localhost:8080/api/hashtagcms/admin/workflows/preview' \
+    -H 'Content-Type: application/json' \
+    -d '{"config":{ /* the JSON above */ },"payload":{"email":"a@b.com"},"platform":"web"}'
+  ```
+
+- **Catalog** — the machine-readable contract for a site (each workflow's alias,
+  expected inputs, and emitted directive types), so a client can validate calls
+  and catch drift: `GET /api/hashtagcms/public/workflows/v1/catalog?site_id=1`.
+- **Logs** — every execution is logged; read them newest-first (optionally per
+  alias): `GET /api/hashtagcms/admin/logs?alias=WORKFLOW_LOAD_PHOTOS&page=0&size=25`,
+  `GET /api/hashtagcms/admin/logs/{id}`.
+
 See [Configuration](configuration.md) for the knobs, [Authentication & SSO](authentication.md)
 for wiring identity, and [Extending](extending.md) for Java handlers, custom
 targets, and directives.
