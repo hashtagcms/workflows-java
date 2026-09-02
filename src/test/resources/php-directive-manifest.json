@@ -1,0 +1,661 @@
+[
+    {
+        "type": "toast",
+        "label": "Toast message",
+        "category": "feedback",
+        "description": "A transient message shown to the user.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "alert",
+        "label": "Alert dialog",
+        "category": "feedback",
+        "description": "A blocking alert dialog with a title and message.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "snackbar",
+        "label": "Snackbar",
+        "category": "feedback",
+        "description": "A snackbar with an optional action button.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "banner",
+        "label": "Inline banner",
+        "category": "feedback",
+        "description": "A persistent inline banner.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "haptic",
+        "label": "Haptic feedback",
+        "category": "feedback",
+        "description": "Physical haptic feedback on supported devices.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "play_sound",
+        "label": "Play sound",
+        "category": "feedback",
+        "description": "Play a short UI sound.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "navigate",
+        "label": "Navigate",
+        "category": "navigation",
+        "description": "Route the client to a named destination.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "go_back",
+        "label": "Go back",
+        "category": "navigation",
+        "description": "Pop the current screen / navigate back.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "switch_tab",
+        "label": "Switch tab",
+        "category": "navigation",
+        "description": "Select a bottom/side navigation tab.",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "scroll_to",
+        "label": "Scroll to",
+        "category": "navigation",
+        "description": "Scroll to an anchor or element.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "open_url",
+        "label": "Open URL",
+        "category": "navigation",
+        "description": "Open an external URL in the browser.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "deep_link",
+        "label": "Deep link",
+        "category": "navigation",
+        "description": "Follow an in-app deep link URI.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "navigate"
+    },
+    {
+        "type": "open_sheet",
+        "label": "Open sheet",
+        "category": "navigation",
+        "description": "Present a modal bottom sheet / drawer.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "navigate"
+    },
+    {
+        "type": "dismiss_sheet",
+        "label": "Dismiss sheet",
+        "category": "navigation",
+        "description": "Dismiss the current sheet / drawer.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "open_modal",
+        "label": "Open modal",
+        "category": "navigation",
+        "description": "Present a modal dialog.",
+        "platforms": null,
+        "fallback": "open_sheet"
+    },
+    {
+        "type": "dismiss_modal",
+        "label": "Dismiss modal",
+        "category": "navigation",
+        "description": "Dismiss the current modal.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "mutate_cart",
+        "label": "Mutate cart",
+        "category": "cart",
+        "description": "Add, remove, or apply changes to the shopping cart.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "toast"
+    },
+    {
+        "type": "update_badge",
+        "label": "Update badge",
+        "category": "cart",
+        "description": "Update a numeric badge (e.g. cart count).",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "set_wishlist",
+        "label": "Set wishlist",
+        "category": "cart",
+        "description": "Add or remove an item from the wishlist.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "toast"
+    },
+    {
+        "type": "render_photos",
+        "label": "Render photos",
+        "category": "content",
+        "description": "Render an image grid from a list payload.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "toast"
+    },
+    {
+        "type": "render_list",
+        "label": "Render list",
+        "category": "content",
+        "description": "Render a generic list from a data payload.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "toast"
+    },
+    {
+        "type": "show_welcome",
+        "label": "Show welcome banner",
+        "category": "content",
+        "description": "Display a welcome banner sourced from a target response.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "banner"
+    },
+    {
+        "type": "update_state",
+        "label": "Update state",
+        "category": "state",
+        "description": "Merge values into the client state store.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "set_value",
+        "label": "Set value",
+        "category": "state",
+        "description": "Set a single key in local/session storage.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "refresh",
+        "label": "Refresh",
+        "category": "state",
+        "description": "Refresh the current screen or a named region.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "reload",
+        "label": "Reload",
+        "category": "state",
+        "description": "Force a full reload of the client.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "invalidate_cache",
+        "label": "Invalidate cache",
+        "category": "state",
+        "description": "Invalidate a cached key on the client.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "set_auth",
+        "label": "Set auth",
+        "category": "auth",
+        "description": "Store an authentication token / session.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "clear_auth",
+        "label": "Clear auth",
+        "category": "auth",
+        "description": "Clear the authentication token / session.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "request_biometric",
+        "label": "Request biometric",
+        "category": "auth",
+        "description": "Prompt for biometric authentication.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "copy_to_clipboard",
+        "label": "Copy to clipboard",
+        "category": "device",
+        "description": "Copy a value to the clipboard.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "share",
+        "label": "Share",
+        "category": "device",
+        "description": "Open the native/web share sheet.",
+        "platforms": null,
+        "fallback": "copy_to_clipboard"
+    },
+    {
+        "type": "request_review",
+        "label": "Request review",
+        "category": "device",
+        "description": "Prompt for an app-store review.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "track_event",
+        "label": "Track event",
+        "category": "analytics",
+        "description": "Emit an analytics event on the client.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "show_loader",
+        "label": "Show loader",
+        "category": "feedback",
+        "description": "Show a loading overlay while something runs.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "hide_loader",
+        "label": "Hide loader",
+        "category": "feedback",
+        "description": "Dismiss the loading overlay.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "progress",
+        "label": "Progress",
+        "category": "feedback",
+        "description": "Update a progress bar (0–100).",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "confetti",
+        "label": "Confetti",
+        "category": "feedback",
+        "description": "Play a celebratory confetti animation.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "confirm",
+        "label": "Confirm dialog",
+        "category": "feedback",
+        "description": "Ask the user to confirm; can run another workflow on the answer.",
+        "platforms": null,
+        "fallback": "alert"
+    },
+    {
+        "type": "coachmark",
+        "label": "Coach mark",
+        "category": "feedback",
+        "description": "Highlight a UI element with an onboarding hint.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "set_field_error",
+        "label": "Set field error",
+        "category": "feedback",
+        "description": "Attach an inline error to a form field.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "replace",
+        "label": "Replace screen",
+        "category": "navigation",
+        "description": "Navigate, replacing the current screen (no back).",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "pop_to_root",
+        "label": "Pop to root",
+        "category": "navigation",
+        "description": "Return to the root of the navigation stack.",
+        "platforms": null,
+        "fallback": "go_back"
+    },
+    {
+        "type": "call_phone",
+        "label": "Call phone",
+        "category": "navigation",
+        "description": "Dial a phone number.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "toast"
+    },
+    {
+        "type": "open_email",
+        "label": "Open email",
+        "category": "navigation",
+        "description": "Compose an email to an address.",
+        "platforms": null,
+        "fallback": "open_url"
+    },
+    {
+        "type": "open_map",
+        "label": "Open map",
+        "category": "navigation",
+        "description": "Open maps to an address or coordinates.",
+        "platforms": null,
+        "fallback": "open_url"
+    },
+    {
+        "type": "open_settings",
+        "label": "Open settings",
+        "category": "navigation",
+        "description": "Open the app/device settings screen.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "start_checkout",
+        "label": "Start checkout",
+        "category": "cart",
+        "description": "Begin the checkout flow.",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "clear_cart",
+        "label": "Clear cart",
+        "category": "cart",
+        "description": "Empty the shopping cart.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "update_quantity",
+        "label": "Update quantity",
+        "category": "cart",
+        "description": "Change the quantity of a cart line item.",
+        "platforms": null,
+        "fallback": "mutate_cart"
+    },
+    {
+        "type": "notify_back_in_stock",
+        "label": "Back-in-stock alert",
+        "category": "cart",
+        "description": "Subscribe the user to a restock alert.",
+        "platforms": null,
+        "fallback": "toast"
+    },
+    {
+        "type": "track_order",
+        "label": "Track order",
+        "category": "cart",
+        "description": "Open order tracking for an order.",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "open_payment_sheet",
+        "label": "Open payment sheet",
+        "category": "payments",
+        "description": "Present a native/web payment sheet.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "navigate"
+    },
+    {
+        "type": "add_payment_method",
+        "label": "Add payment method",
+        "category": "payments",
+        "description": "Prompt the user to add a card/method.",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "show_paywall",
+        "label": "Show paywall",
+        "category": "payments",
+        "description": "Present a subscription paywall.",
+        "platforms": null,
+        "fallback": "navigate"
+    },
+    {
+        "type": "render_component",
+        "label": "Render component",
+        "category": "content",
+        "description": "Render an SDUI component tree.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": "render_list"
+    },
+    {
+        "type": "update_component",
+        "label": "Update component",
+        "category": "content",
+        "description": "Patch an already-rendered component.",
+        "platforms": {
+            "web": "1.0",
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "set_theme",
+        "label": "Set theme",
+        "category": "content",
+        "description": "Switch the app theme.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "set_locale",
+        "label": "Set locale",
+        "category": "content",
+        "description": "Change the app language/locale.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "request_permission",
+        "label": "Request permission",
+        "category": "device",
+        "description": "Prompt for a device permission.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "schedule_notification",
+        "label": "Schedule notification",
+        "category": "device",
+        "description": "Schedule a local notification.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "add_to_calendar",
+        "label": "Add to calendar",
+        "category": "device",
+        "description": "Add an event to the device calendar.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "scan_qr",
+        "label": "Scan QR",
+        "category": "device",
+        "description": "Open the QR scanner.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "scan_barcode",
+        "label": "Scan barcode",
+        "category": "device",
+        "description": "Open the barcode scanner.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "download_file",
+        "label": "Download file",
+        "category": "device",
+        "description": "Download/save a file.",
+        "platforms": null,
+        "fallback": "open_url"
+    },
+    {
+        "type": "get_location",
+        "label": "Get location",
+        "category": "device",
+        "description": "Fetch the current device location.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "run_workflow",
+        "label": "Run workflow",
+        "category": "flow",
+        "description": "Trigger another workflow by alias (compose workflows).",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "delay",
+        "label": "Delay",
+        "category": "flow",
+        "description": "Wait before the next directive runs.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "emit_event",
+        "label": "Emit event",
+        "category": "flow",
+        "description": "Fire a client-side event on the app event bus.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "set_flag",
+        "label": "Set flag",
+        "category": "flow",
+        "description": "Set a feature/session flag on the client.",
+        "platforms": null,
+        "fallback": null
+    },
+    {
+        "type": "register_push",
+        "label": "Register push",
+        "category": "growth",
+        "description": "Register the device for push notifications.",
+        "platforms": {
+            "android": "1.0",
+            "ios": "1.0"
+        },
+        "fallback": null
+    },
+    {
+        "type": "share_referral",
+        "label": "Share referral",
+        "category": "growth",
+        "description": "Open a referral/share flow.",
+        "platforms": null,
+        "fallback": "share"
+    }
+]

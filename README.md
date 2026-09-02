@@ -25,7 +25,7 @@ standalone as a ready-made microservice.
 - **Documentation:** see the [`docs/`](docs/) guides — [Getting started](docs/getting-started.md),
   [Configuration](docs/configuration.md), [Docker](docs/docker.md),
   [Authentication & SSO](docs/authentication.md), [Extending](docs/extending.md),
-  [Publishing](docs/publishing.md).
+  [Compatibility](docs/compatibility.md), [Publishing](docs/publishing.md).
 
 ## Installation
 
@@ -98,14 +98,14 @@ the `-exec.jar` is the self-contained runnable one.)
 
 ## Run with Docker
 
-The image is published to **Docker Hub** as `hashtagcms/workflows` (also on GHCR as
-`ghcr.io/hashtagcms/workflows`). Each release is tagged with its exact version and
+The image is published to **Docker Hub** as `hashtagcms/workflows-java` (also on GHCR as
+`ghcr.io/hashtagcms/workflows-java`). Each release is tagged with its exact version and
 `latest` — **pin the version in production**. It runs standalone on in-memory H2
 out of the box — nothing else to install.
 
 ```bash
-docker pull hashtagcms/workflows:1.0.0
-docker run --rm -p 8080:8080 hashtagcms/workflows:1.0.0
+docker pull hashtagcms/workflows-java:1.0.0
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
 # then:  curl http://localhost:8080/api/hashtagcms/public/workflows/v1/health
 ```
 
@@ -118,14 +118,14 @@ docker run --rm -p 8080:8080 \
   -e SPRING_DATASOURCE_URL='jdbc:mysql://db-host:3306/workflows?useSSL=false&allowPublicKeyRetrieval=true' \
   -e SPRING_DATASOURCE_USERNAME=workflows -e SPRING_DATASOURCE_PASSWORD=secret \
   -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
-  hashtagcms/workflows:1.0.0
+  hashtagcms/workflows-java:1.0.0
 
 # Or alongside the PHP app, on the tables PHP owns (validate-only, no seeding):
 docker run --rm -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=shared \
   -e DB_URL='jdbc:mysql://host.docker.internal:3306/v30?useSSL=false&allowPublicKeyRetrieval=true' \
   -e DB_USERNAME=root -e DB_PASSWORD=secret \
-  hashtagcms/workflows:1.0.0
+  hashtagcms/workflows-java:1.0.0
 ```
 
 Or build and run it from source with Compose. It connects to a MySQL you already
@@ -136,10 +136,11 @@ option, then:
 docker compose up --build            # H2 with no .env; your running MySQL when .env is set
 ```
 
-The image is non-root, multi-arch (amd64 + arm64), with a built-in `HEALTHCHECK`.
-For PostgreSQL/MariaDB, other databases, and every env var, see
-[Docker](docs/docker.md) (or embed the [Maven library](#installation) with your own
-driver).
+The image is non-root, multi-arch (amd64 + arm64), with a built-in `HEALTHCHECK`
+and Spring Boot Actuator — `/actuator/health` (+ `/health/liveness` and
+`/health/readiness` for k8s) and `/actuator/prometheus`. For PostgreSQL/MariaDB,
+other databases, observability, and every env var, see [Docker](docs/docker.md)
+(or embed the [Maven library](#installation) with your own driver).
 
 ## Public API
 
@@ -184,6 +185,14 @@ curl -X POST 'http://localhost:8080/api/hashtagcms/public/workflows/v1/execute' 
 | `/api/hashtagcms/admin/workflows/preview` | `POST` — dry-run an unsaved `config` through the engine (validation + negotiation), no persistence. Body: `{ config, payload, platform, app_version, site_id, capabilities }`. |
 | `/api/hashtagcms/admin/directives` | CRUD the directive manifest. |
 | `/api/hashtagcms/admin/logs` | Audit log — `GET` list (newest-first, paginated: `?alias=&page=&size=`), `GET/{id}`, `DELETE/{id}`. |
+
+## Typed clients (server-driven UI)
+
+Compile-time-safe models of the directive contract — a typed directive-type enum
+(with each directive's category and negotiation fallback) — are generated from the
+manifest for **Kotlin/KMP**, **TypeScript**, and **Swift** under
+[`clients/`](clients/). SDUI clients switch over the enum instead of raw strings;
+a freshness test keeps them in sync with the server. See [clients/README.md](clients/README.md).
 
 ## Concepts
 
@@ -307,9 +316,12 @@ config/         @ConfigurationProperties + startup seeding + env wiring
 ```
 
 Covers the interpolator, the engine (interpolation + validation + data), the auth
-drivers (header + JWT), and the API end-to-end (health, manifest, per-platform
-filtering, execute with interpolation + negotiation). The suite uses in-memory H2
-and needs no external services.
+drivers (header + JWT + **Sanctum** token validation), the target adapters
+(**http** SSRF guards, **service**, **event**, **custom_class**), the API
+end-to-end (health, manifest, per-platform filtering, execute, **catalog**,
+**preview**, audit **logs**), Actuator, the **PHP↔Java manifest parity** guard,
+the generated-client freshness guard, and the shared-DB schema-compat message.
+The suite uses in-memory H2 and needs no external services.
 
 ## Building & releasing
 

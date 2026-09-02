@@ -23,6 +23,14 @@ hashtagcms:
       seed-directives: true        # seed the 72-directive manifest on startup
       seed-examples: true          # seed the example workflows on startup
 
+    http:                          # egress controls for the `http` target adapter (SSRF hardening)
+      allowed-hosts: []            # empty = any host; else exact or ".example.com" / "*.example.com"
+      block-private-networks: false # true = block loopback/private/link-local + 169.254.169.254 (cloud metadata)
+      connect-timeout-ms: 10000
+      read-timeout-ms: 10000       # a target's own `timeout` (seconds) overrides this per call
+      max-retries: 0               # retry idempotent requests (GET/HEAD/PUT/DELETE/OPTIONS, or when idempotencyKey set) on IOException / 429 / 5xx
+      retry-backoff-ms: 200        # linear backoff: backoff * attempt
+
     auth:
       driver: header               # header | sanctum | jwt   (see Authentication & SSO)
       enforce-required: true       # reject auth_required workflows with 401 when no user resolves

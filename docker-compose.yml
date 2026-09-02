@@ -14,7 +14,7 @@ services:
       context: .
       args:
         VERSION: ${VERSION:-1.0.0}
-    image: hashtagcms/workflows:${VERSION:-1.0.0}
+    image: hashtagcms/workflows-java:${VERSION:-1.0.0}
     container_name: hashtagcms-workflows
     ports:
       - "${HOST_PORT:-8080}:8080"

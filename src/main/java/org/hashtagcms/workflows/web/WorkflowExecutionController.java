@@ -99,7 +99,7 @@ public class WorkflowExecutionController {
     public Map<String, Object> health() {
         return Map.of(
                 "status", "ok",
-                "module", "hashtagcms/workflows-java",
+                "module", "workflows-java",
                 "registered_handlers", new ArrayList<>(handlers.all().keySet()));
     }
 

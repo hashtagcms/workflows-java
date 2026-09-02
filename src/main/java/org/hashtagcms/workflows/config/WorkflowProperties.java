@@ -2,6 +2,9 @@ package org.hashtagcms.workflows.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Binds `hashtagcms.workflows.*` configuration. */
 @ConfigurationProperties(prefix = "hashtagcms.workflows")
 public class WorkflowProperties {
@@ -25,8 +28,10 @@ public class WorkflowProperties {
     private final Negotiation negotiation = new Negotiation();
     private final Install install = new Install();
     private final Auth auth = new Auth();
+    private final Http http = new Http();
 
     public Auth getAuth() { return auth; }
+    public Http getHttp() { return http; }
 
     public long getMasterSiteId() { return masterSiteId; }
     public void setMasterSiteId(long masterSiteId) { this.masterSiteId = masterSiteId; }
@@ -50,6 +55,50 @@ public class WorkflowProperties {
         public void setSeedDirectives(boolean v) { this.seedDirectives = v; }
         public boolean isSeedExamples() { return seedExamples; }
         public void setSeedExamples(boolean v) { this.seedExamples = v; }
+    }
+
+    /**
+     * Egress controls and client tuning for the {@code http} target adapter. Because
+     * a workflow's {@code target.url} can interpolate request-supplied
+     * {@code {{ payload.* }}} values, these guard against SSRF.
+     */
+    public static class Http {
+        /**
+         * Allowlist of hosts the http target may call. Empty = no allowlist (any host).
+         * Entries match the URL host case-insensitively; a leading dot or {@code *.}
+         * matches subdomains (e.g. {@code .example.com} / {@code *.example.com} allow
+         * {@code api.example.com} and {@code example.com}).
+         */
+        private List<String> allowedHosts = new ArrayList<>();
+        /**
+         * When true, block targets that resolve to loopback / private / link-local
+         * addresses and the cloud metadata IP (169.254.169.254) — the core SSRF
+         * defense against internal-service access. Default false to avoid breaking
+         * deployments that legitimately call internal hosts; enable it when workflow
+         * configs are authored by less-trusted users.
+         */
+        private boolean blockPrivateNetworks = false;
+        /** Default connect timeout (ms). */
+        private int connectTimeoutMs = 10_000;
+        /** Default per-request read timeout (ms). A target's own {@code timeout} (seconds) overrides this. */
+        private int readTimeoutMs = 10_000;
+        /** Retry attempts on transient failures (IOException / 429 / 5xx). 0 = no retry. */
+        private int maxRetries = 0;
+        /** Base backoff between retries (ms); grows linearly with the attempt number. */
+        private long retryBackoffMs = 200;
+
+        public List<String> getAllowedHosts() { return allowedHosts; }
+        public void setAllowedHosts(List<String> v) { this.allowedHosts = v; }
+        public boolean isBlockPrivateNetworks() { return blockPrivateNetworks; }
+        public void setBlockPrivateNetworks(boolean v) { this.blockPrivateNetworks = v; }
+        public int getConnectTimeoutMs() { return connectTimeoutMs; }
+        public void setConnectTimeoutMs(int v) { this.connectTimeoutMs = v; }
+        public int getReadTimeoutMs() { return readTimeoutMs; }
+        public void setReadTimeoutMs(int v) { this.readTimeoutMs = v; }
+        public int getMaxRetries() { return maxRetries; }
+        public void setMaxRetries(int v) { this.maxRetries = v; }
+        public long getRetryBackoffMs() { return retryBackoffMs; }
+        public void setRetryBackoffMs(long v) { this.retryBackoffMs = v; }
     }
 
     public static class Auth {

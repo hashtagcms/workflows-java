@@ -88,6 +88,21 @@
             <version>9.40</version>
         </dependency>
 
+        <!-- Health probes (liveness/readiness) + Prometheus metrics for the standalone
+             runner / Docker image. Optional so library consumers are not forced to adopt
+             it; when present, Boot auto-configures the endpoints (see application.yml). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!-- JDBC drivers are the host application's choice — provided here only for the
              standalone runner / tests, and NOT propagated to consumers (optional). -->
         <dependency>

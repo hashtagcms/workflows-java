@@ -7,18 +7,20 @@ whole engine as a microservice with no JDK, Maven, or database to install. It ru
 standalone on in-memory **H2** out of the box, and can be pointed at **MySQL** with
 environment variables.
 
-- **Base:** `eclipse-temurin:21-jre` (Ubuntu), **non-root** (`app` user).
+- **Base:** Alpine + a trimmed **jlink** custom runtime (built from
+  `eclipse-temurin:21-jdk-alpine`), **non-root** (`app` user) — ~257 MB.
 - **Multi-arch:** `linux/amd64` + `linux/arm64`.
 - **Port:** `8080`.
-- **Health:** built-in `HEALTHCHECK` against the public health endpoint.
+- **Health:** built-in `HEALTHCHECK` against Spring Boot Actuator `/actuator/health`.
+- **Observability:** Actuator liveness/readiness probes + Prometheus metrics (see below).
 - **Bundled JDBC drivers:** **H2** and **MySQL** (see [Database](#database)).
 
 ## Where to pull the image
 
 | Registry | Image | Pull |
 |---|---|---|
-| **Docker Hub** (primary) | `hashtagcms/workflows` | `docker pull hashtagcms/workflows:1.0.0` |
-| **GitHub Container Registry** | `ghcr.io/hashtagcms/workflows` | `docker pull ghcr.io/hashtagcms/workflows:1.0.0` |
+| **Docker Hub** (primary) | `hashtagcms/workflows-java` | `docker pull hashtagcms/workflows-java:1.0.0` |
+| **GitHub Container Registry** | `ghcr.io/hashtagcms/workflows-java` | `docker pull ghcr.io/hashtagcms/workflows-java:1.0.0` |
 
 **Tags:** each release is published as its exact version (e.g. `1.0.0`) and as
 `latest`. **Pin the exact version in production**; use `latest` only for quick
@@ -27,8 +29,8 @@ trials. The version tag always matches the Maven artifact version and the Git ta
 ## Pull & run
 
 ```bash
-docker pull hashtagcms/workflows:1.0.0
-docker run --rm -p 8080:8080 hashtagcms/workflows:1.0.0
+docker pull hashtagcms/workflows-java:1.0.0
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
 ```
 
 Verify it:
@@ -41,6 +43,34 @@ curl 'http://localhost:8080/api/hashtagcms/public/workflows/v1/catalog?site_id=1
 That default run uses an **in-memory H2** database — everything works immediately,
 but all data is lost when the container stops. For anything real, connect a
 database (next section).
+
+## Observability (Actuator)
+
+The image bundles Spring Boot Actuator. On the same port (`8080`):
+
+| Endpoint | Purpose |
+|---|---|
+| `/actuator/health` | Aggregate health (incl. DB connectivity) — what the container `HEALTHCHECK` hits. |
+| `/actuator/health/liveness` | Kubernetes **liveness** probe. |
+| `/actuator/health/readiness` | Kubernetes **readiness** probe (fails while the DB is unreachable). |
+| `/actuator/prometheus` | Prometheus scrape endpoint. |
+| `/actuator/metrics` | Micrometer metrics index. |
+
+Kubernetes probes:
+
+```yaml
+livenessProbe:
+  httpGet: { path: /actuator/health/liveness, port: 8080 }
+readinessProbe:
+  httpGet: { path: /actuator/health/readiness, port: 8080 }
+```
+
+Exposure and detail level are set in `application.yml` under `management.*`; health
+details are hidden by default (`show-details: never`) — raise to `when-authorized`
+or `always` in a trusted network, or expose more endpoints via
+`MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE`. As a library dependency, Actuator is
+**optional** — it activates only when `spring-boot-starter-actuator` is on the
+classpath (it is in this image).
 
 ## Database
 
@@ -71,7 +101,7 @@ docker run --rm -p 8080:8080 \
   -e SPRING_DATASOURCE_PASSWORD=secret \
   -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
   -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
-  hashtagcms/workflows:1.0.0
+  hashtagcms/workflows-java:1.0.0
 ```
 
 ### 2. Alongside the PHP app (shared, PHP-owned schema)
@@ -86,7 +116,7 @@ docker run --rm -p 8080:8080 \
   -e DB_URL='jdbc:mysql://db-host:3306/v30?useSSL=false&allowPublicKeyRetrieval=true' \
   -e DB_USERNAME=root \
   -e DB_PASSWORD=secret \
-  hashtagcms/workflows:1.0.0
+  hashtagcms/workflows-java:1.0.0
 ```
 
 Reaching a database on the **host** from inside the container: use
@@ -140,17 +170,22 @@ Everything is driven by env vars — Spring relaxed binding maps `SPRING_...` an
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | *(none)* | Consulted **only** by the `shared` profile. |
 | `HASHTAGCMS_WORKFLOWS_ROUTE_PREFIX` | `/api/hashtagcms` | Base API path (also used by the healthcheck). |
 | `HASHTAGCMS_WORKFLOWS_EXPOSE_ERROR_DETAILS` | `false` | Return real exception messages in API errors (dev only). |
+| `H2_CONSOLE_ENABLED` | `false` | Expose the H2 web console at `/h2-console` — local H2 dev only; never with a real DB. |
 
 ## Build the image yourself
 
 ```bash
-docker build -t hashtagcms/workflows:1.0.0 .
-docker run --rm -p 8080:8080 hashtagcms/workflows:1.0.0
+docker build -t hashtagcms/workflows-java:1.0.0 .
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
 ```
 
 The build is a two-stage Dockerfile: stage one compiles the runnable `-exec.jar`
-with the Maven Wrapper (a BuildKit cache mount keeps `~/.m2` warm between builds),
-stage two copies just that jar onto a slim JRE.
+with the Maven Wrapper (a BuildKit cache mount keeps `~/.m2` warm between builds)
+and runs `jlink` to build a trimmed custom Java runtime (only the modules Spring
+Boot + JPA/JDBC + Actuator + JWT need, incl. `jdk.charsets`/`jdk.localedata` and the
+TLS/JWT crypto modules); stage two copies that runtime and the jar onto bare Alpine.
+If you add a dependency that needs a module not in the list, add it to the
+`--add-modules` set in the `Dockerfile`.
 
 ## Use the Maven library instead
 
@@ -182,9 +217,9 @@ Then configure `spring.datasource.*` as usual — the library uses whatever
 
 ```bash
 docker login                                # or: docker login ghcr.io
-./docker/build-and-push.sh                  # hashtagcms/workflows:<pom-version> + :latest
+./docker/build-and-push.sh                  # hashtagcms/workflows-java:<pom-version> + :latest
 VERSION=1.2.0 ./docker/build-and-push.sh    # a specific version
-IMAGE=ghcr.io/hashtagcms/workflows ./docker/build-and-push.sh
+IMAGE=ghcr.io/hashtagcms/workflows-java ./docker/build-and-push.sh
 PUSH=false ./docker/build-and-push.sh       # local single-arch build, no push
 ```
 

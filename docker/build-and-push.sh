@@ -3,7 +3,7 @@
 # Build and publish the HashtagCMS Workflows (Java) image to a registry.
 #
 # Multi-arch (linux/amd64 + linux/arm64) via buildx. By default it tags both the
-# exact version and `latest`, and pushes to Docker Hub under `hashtagcms/workflows`.
+# exact version and `latest`, and pushes to Docker Hub under `hashtagcms/workflows-java`.
 #
 # Usage:
 #   ./docker/build-and-push.sh                 # build + push :1.0.0 and :latest
@@ -16,7 +16,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-IMAGE="${IMAGE:-hashtagcms/workflows}"
+IMAGE="${IMAGE:-hashtagcms/workflows-java}"
 # Default the version to the pom's <version> so the tag always matches the jar.
 VERSION="${VERSION:-$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' pom.xml | head -1)}"
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"

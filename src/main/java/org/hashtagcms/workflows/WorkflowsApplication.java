@@ -1,5 +1,6 @@
 package org.hashtagcms.workflows;
 
+import org.hashtagcms.workflows.config.SchemaCompatibilityListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -19,6 +20,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 @EnableAutoConfiguration
 public class WorkflowsApplication {
     public static void main(String[] args) {
-        SpringApplication.run(WorkflowsApplication.class, args);
+        SpringApplication app = new SpringApplication(WorkflowsApplication.class);
+        // Explain a shared-mode schema-validation failure instead of a raw stack trace.
+        app.addListeners(new SchemaCompatibilityListener());
+        app.run(args);
     }
 }

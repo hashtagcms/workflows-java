@@ -7,13 +7,14 @@
 # HEALTHCHECK. Runs standalone out of the box on in-memory H2, or point it at a
 # shared MySQL/Postgres via env vars (see `docker-compose.yml` / `.env.example`).
 #
-# Build locally:   docker build -t hashtagcms/workflows:1.0.0 .
-# Run locally:     docker run --rm -p 8080:8080 hashtagcms/workflows:1.0.0
+# Build locally:   docker build -t hashtagcms/workflows-java:1.0.0 .
+# Run locally:     docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
 # Multi-arch push: see docker/build-and-push.sh
 # =============================================================================
 
-# ---- Build stage: compile the runnable (exec) jar with the Maven Wrapper ----
-FROM eclipse-temurin:21-jdk AS build
+# ---- Build stage: compile the jar + build a trimmed jlink runtime ----
+# Alpine (musl) JDK so the jlink runtime matches the Alpine runtime base.
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /workspace
 
 # Dependencies first, for layer caching. A BuildKit cache mount keeps the local
@@ -29,16 +30,24 @@ RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw -B clean package -DskipTests \
  && cp target/*-exec.jar app.jar
 
-# ---- Runtime stage: slim JRE, non-root, healthchecked ----
-FROM eclipse-temurin:21-jre AS runtime
+# A custom runtime with only the modules Spring Boot + JPA/JDBC + actuator + JWT
+# need. The set is conservative (includes jdk.charsets and jdk.localedata so
+# non-US charsets/locales keep working, and the crypto modules for TLS + JWT).
+RUN "$JAVA_HOME/bin/jlink" \
+      --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.charsets,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.management,jdk.management.agent,jdk.net,jdk.unsupported \
+      --strip-debug --no-header-files --no-man-pages --compress=zip-6 \
+      --output /javaruntime
+
+# ---- Runtime stage: bare Alpine + the jlink runtime, non-root, healthchecked ----
+FROM alpine:3.24 AS runtime
+ENV JAVA_HOME=/opt/java/jre
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 WORKDIR /app
 
-# curl is used only by the container HEALTHCHECK below.
-RUN apt-get update \
- && apt-get install -y --no-install-recommends curl \
- && rm -rf /var/lib/apt/lists/* \
- && groupadd -r app && useradd -r -g app app
+RUN apk add --no-cache curl \
+ && addgroup -S app && adduser -S -G app app
 
+COPY --from=build /javaruntime $JAVA_HOME
 COPY --from=build /workspace/app.jar app.jar
 USER app
 
@@ -61,9 +70,9 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0" \
     SERVER_PORT=8080 \
     HASHTAGCMS_WORKFLOWS_ROUTE_PREFIX=/api/hashtagcms
 
-# Liveness: hit the public health endpoint. Honors the configured route prefix
-# and server port, so it keeps working if you override either.
+# Health: hit the Actuator health endpoint (aggregates DB connectivity etc.).
+# Actuator lives at /actuator regardless of the workflows route prefix.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD curl -fsS "http://127.0.0.1:${SERVER_PORT}${HASHTAGCMS_WORKFLOWS_ROUTE_PREFIX}/public/workflows/v1/health" || exit 1
+  CMD curl -fsS "http://127.0.0.1:${SERVER_PORT}/actuator/health" || exit 1
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

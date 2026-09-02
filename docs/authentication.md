@@ -109,6 +109,23 @@ time, check expiry, load the `users` row. Issue a token from the PHP side with:
 $user->createToken('name')->plainTextToken;
 ```
 
+### Schema expectations
+
+In shared mode the library **never migrates** — PHP owns the schema and Java only
+validates it. The database must already contain the tables this version maps:
+`workflows`, `workflow_logs`, `workflow_directives`, `users`,
+`personal_access_tokens`. Run the PHP package's migrations first, then start the
+Java service.
+
+Keep the versions aligned: a given Java library version validates against the
+schema shipped by the **matching PHP `hashtagcms/workflows` version** (they move
+together — same tables, same columns). If the tables are missing, the DB is wrong,
+or the schema has drifted, startup aborts with a clear, actionable message
+(see [`SchemaCompatibilityListener`](../src/main/java/org/hashtagcms/workflows/config/SchemaCompatibilityListener.java))
+rather than a raw Hibernate stack trace. For a **standalone, Java-owned** database
+instead, don't use the shared profile — set `ddl-auto=update` and let the service
+create and seed its own schema.
+
 ## Custom resolver
 
 Any scheme the built-ins don't cover — Spring Security, mTLS, a bespoke session

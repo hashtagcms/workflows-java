@@ -9,6 +9,7 @@ install snippet, then dive in here.
 | [Getting started](getting-started.md) | Add the dependency, execute your first workflow, define workflows. |
 | [Configuration](configuration.md) | Every `hashtagcms.workflows.*` property, profiles, datasource. |
 | [Docker](docker.md) | Run the published image, Compose profiles (H2 / MySQL), env vars, multi-arch publishing. |
+| [Compatibility](compatibility.md) | Version matrix — library ↔ PHP ↔ API ↔ config schema ↔ client app versions. |
 | [Authentication & SSO](authentication.md) | The resolver seam and the `header` / `sanctum` / `jwt` drivers. |
 | [Extending](extending.md) | Custom handlers, targets, directives, and a custom user resolver. |
 | [Publishing](publishing.md) | Releasing the library to Maven Central. |

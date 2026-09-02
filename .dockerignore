@@ -7,6 +7,7 @@ target/
 .vscode/
 docs/
 art/
+clients/
 *.md
 Dockerfile
 .dockerignore

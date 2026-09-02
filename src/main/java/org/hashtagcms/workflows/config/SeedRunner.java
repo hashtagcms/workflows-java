@@ -31,5 +31,10 @@ public class SeedRunner implements ApplicationRunner {
             int n = seedService.seedExamples();
             log.info("Seeded {} example workflows.", n);
         }
+        if (!properties.getInstall().isSeedDirectives() && !properties.getInstall().isSeedExamples()) {
+            // Reached here only if the context started, i.e. schema validation passed.
+            log.info("Seeding disabled — running against an externally-managed schema "
+                    + "(e.g. the shared PHP database); schema validated OK.");
+        }
     }
 }

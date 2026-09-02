@@ -55,7 +55,7 @@ public final class DirectiveManifest {
                 null, sch("message", "string?"), null),
             d("hide_loader", "Hide loader", "feedback", "Dismiss the loading overlay.",
                 null, sch(), null),
-            d("progress", "Progress", "feedback", "Update a progress bar (0-100).",
+            d("progress", "Progress", "feedback", "Update a progress bar (0–100).",
                 null, sch("value", "int", "label", "string?"), null),
             d("confetti", "Confetti", "feedback", "Play a celebratory confetti animation.",
                 null, sch(), null),
