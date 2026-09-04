@@ -29,9 +29,11 @@ public class WorkflowProperties {
     private final Install install = new Install();
     private final Auth auth = new Auth();
     private final Http http = new Http();
+    private final Docs docs = new Docs();
 
     public Auth getAuth() { return auth; }
     public Http getHttp() { return http; }
+    public Docs getDocs() { return docs; }
 
     public long getMasterSiteId() { return masterSiteId; }
     public void setMasterSiteId(long masterSiteId) { this.masterSiteId = masterSiteId; }
@@ -42,6 +44,12 @@ public class WorkflowProperties {
     public Negotiation getNegotiation() { return negotiation; }
     public Install getInstall() { return install; }
 
+    public static class Docs {
+        private boolean enabled = false;
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    }
+
     public static class Negotiation {
         private boolean enabled = true;
         public boolean isEnabled() { return enabled; }
@@ -51,10 +59,23 @@ public class WorkflowProperties {
     public static class Install {
         private boolean seedDirectives = true;
         private boolean seedExamples = true;
+        /**
+         * Opt-in companion login workflow ({@code WORKFLOW_LOGIN_TEST}) that *obtains*
+         * a token from an external HashtagCMS login API — the complement to the SSO
+         * module, which *verifies* one. Off by default because it targets a specific
+         * host; enable it and point {@link #loginTestUrl} at your environment.
+         */
+        private boolean seedLoginTest = false;
+        /** Login endpoint the {@code WORKFLOW_LOGIN_TEST} seed posts credentials to (placeholder until set). */
+        private String loginTestUrl = "https://auth.example.com/api/hashtagcms/public/user/v1/login";
         public boolean isSeedDirectives() { return seedDirectives; }
         public void setSeedDirectives(boolean v) { this.seedDirectives = v; }
         public boolean isSeedExamples() { return seedExamples; }
         public void setSeedExamples(boolean v) { this.seedExamples = v; }
+        public boolean isSeedLoginTest() { return seedLoginTest; }
+        public void setSeedLoginTest(boolean v) { this.seedLoginTest = v; }
+        public String getLoginTestUrl() { return loginTestUrl; }
+        public void setLoginTestUrl(String v) { this.loginTestUrl = v; }
     }
 
     /**

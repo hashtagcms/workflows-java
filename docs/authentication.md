@@ -20,6 +20,14 @@ Which resolver runs is chosen by `hashtagcms.workflows.auth.driver`:
 `auth.enforce-required: true` (default) makes an `auth_required` workflow return
 **401** when no user resolves; set it to `false` to keep the identity advisory.
 
+> **Data-driven SSO providers.** The `auth.driver` above is a single, app-wide
+> resolver chosen by configuration. For **per-site, per-workflow** external login —
+> managed as data (a `workflow_sso_providers` table with `opaque`/`jwt` drivers, a
+> configurable credential header, a per-workflow provider pin, and `{{ claims.* }}`
+> / `{{ identity.* }}`) — see **[SSO / External-Login Providers](sso-providers.md)**.
+> When that module is active it resolves identity per request and falls back to the
+> `WorkflowUserResolver` below.
+
 ## `header` — trusted gateway (default)
 
 A gateway or SSO proxy authenticates the request and forwards the identity as

@@ -60,7 +60,7 @@ public class WorkflowExecutionController {
         } else if (request.getPlatform() != null) {
             platform = request.getPlatform();
         }
-        long siteId = request.getSiteId() == null ? 1L : request.getSiteId();
+        long siteId = resolveSiteId(request.getSiteId(), httpRequest);
         List<String> capabilities = request.getCapabilities() == null ? List.of() : request.getCapabilities();
         Map<String, Object> user = userResolver.resolveUser(httpRequest);
 
@@ -68,12 +68,12 @@ public class WorkflowExecutionController {
             var response = workflowService.execute(
                     request.getWorkflow(),
                     request.getPayload() == null ? Map.of() : request.getPayload(),
-                    siteId, platform, appVersion, capabilities, user);
+                    siteId, platform, appVersion, capabilities, user, httpRequest);
             return ResponseEntity.ok(response.toMap());
         } catch (UnauthorizedException e) {
             Map<String, Object> toast = new LinkedHashMap<>();
             toast.put("type", "toast");
-            toast.put("message", "Authentication required.");
+            toast.put("message", e.getMessage());
             toast.put("level", "error");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
@@ -93,6 +93,21 @@ public class WorkflowExecutionController {
                     "message", clientMessage,
                     "directives", List.of(toast)));
         }
+    }
+
+    /**
+     * Site precedence, matching the PHP reference: the request body's {@code site_id},
+     * else the {@code X-Site-Id} header, else the configured master site.
+     */
+    private long resolveSiteId(Long bodySiteId, HttpServletRequest httpRequest) {
+        if (bodySiteId != null) return bodySiteId;
+        String header = httpRequest == null ? null : httpRequest.getHeader("X-Site-Id");
+        if (header != null && !header.isBlank()) {
+            try {
+                return Long.parseLong(header.trim());
+            } catch (NumberFormatException ignored) { /* fall through to master */ }
+        }
+        return properties.getMasterSiteId();
     }
 
     @GetMapping("/health")

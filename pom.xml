@@ -126,6 +126,29 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>docs</directory>
+                <targetPath>workflows-site/docs</targetPath>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>CHANGELOG.md</include>
+                </includes>
+                <targetPath>workflows-site/docs</targetPath>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>README.md</include>
+                </includes>
+                <targetPath>workflows-site</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <!-- Keep the plain library jar as the MAIN (consumable) artifact; attach the
                  runnable fat jar under the `exec` classifier for the standalone runner. -->

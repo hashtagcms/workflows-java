@@ -26,6 +26,8 @@ RUN --mount=type=cache,target=/root/.m2 \
 
 # Then the sources.
 COPY src/ src/
+COPY docs/ docs/
+COPY README.md CHANGELOG.md ./
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw -B clean package -DskipTests \
  && cp target/*-exec.jar app.jar

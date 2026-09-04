@@ -11,6 +11,7 @@ install snippet, then dive in here.
 | [Docker](docker.md) | Run the published image, Compose profiles (H2 / MySQL), env vars, multi-arch publishing. |
 | [Compatibility](compatibility.md) | Version matrix — library ↔ PHP ↔ API ↔ config schema ↔ client app versions. |
 | [Authentication & SSO](authentication.md) | The resolver seam and the `header` / `sanctum` / `jwt` drivers. |
+| [SSO / External-Login Providers](sso-providers.md) | The data-driven `workflow_sso_providers` module: per-site providers, per-workflow pins, claims, and the admin REST API. |
 | [Extending](extending.md) | Custom handlers, targets, directives, and a custom user resolver. |
 | [Publishing](publishing.md) | Releasing the library to Maven Central. |
 

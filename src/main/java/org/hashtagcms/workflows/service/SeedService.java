@@ -60,6 +60,57 @@ public class SeedService {
         return n;
     }
 
+    /**
+     * Opt-in companion workflow that *obtains* a credential from an external
+     * HashtagCMS login API (the complement to the SSO module, which *verifies*
+     * one). POSTs {@code {{payload.email}}} / {@code {{payload.password}}} and
+     * returns the issued token + user via {@code on_success.data} — nothing is
+     * stored in the workflow. Not seeded by default (targets a specific host);
+     * enable via {@code hashtagcms.workflows.install.seed-login-test=true} and set
+     * {@code install.login-test-url}. Java analogue of PHP's LoginTestWorkflowSeeder.
+     */
+    @Transactional
+    public int seedLoginTest() {
+        upsert("WORKFLOW_LOGIN_TEST", "Login (test, external app)",
+                "Logs a user in against an external HashtagCMS login API and returns the issued token + user.",
+                loginTest(properties.getInstall().getLoginTestUrl()), false);
+        return 1;
+    }
+
+    private Map<String, Object> loginTest(String loginUrl) {
+        return map(
+            "version", "1.0",
+            "validation", map(
+                "rules", map("email", "required|email", "password", "required|string"),
+                "messages", map(
+                    "email.required", "Email is required.",
+                    "email.email", "Enter a valid email address.",
+                    "password.required", "Password is required."),
+                "on_error", map("directives", list(
+                    map("type", "toast", "level", "error", "message", "Please enter your email and password.")
+                ))),
+            "target", map("type", "http", "method", "POST", "url", loginUrl,
+                "headers", map("Accept", "application/json", "Content-Type", "application/json"),
+                "body", map("email", "{{ payload.email }}", "password", "{{ payload.password }}"),
+                "timeout", 15),
+            "on_success", map(
+                "message", "Logged in.",
+                "data", map(
+                    "token", "{{ response.body.token.access_token }}",
+                    "expires_at", "{{ response.body.token.expires_at }}",
+                    "user", "{{ response.body.user }}"),
+                "directives", list(
+                    map("type", "toast", "level", "success", "message", "Welcome back!"),
+                    map("type", "navigate", "target", "home"))),
+            "on_failure", map(
+                "message", "{{ response.body.message | default: \"Login failed. Please check your credentials.\" }}",
+                "directives", list(
+                    map("type", "toast", "level", "error",
+                        "message", "{{ response.body.message | default: \"Login failed. Please check your credentials.\" }}")
+                ))
+        );
+    }
+
     private int upsert(String alias, String name, String description, Map<String, Object> config, boolean authRequired) {
         Workflow wf = workflows.findBySiteIdAndAlias(1L, alias).orElseGet(Workflow::new);
         wf.setSiteId(1L);

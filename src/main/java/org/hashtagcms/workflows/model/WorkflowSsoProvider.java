@@ -6,10 +6,24 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * A data-driven SSO / external-login provider (the {@code workflow_sso_providers}
+ * table owned by the PHP package). A provider row tells the SSO resolver how to
+ * verify a client credential and map it to a workflow identity: the verification
+ * detail lives in {@link #config} (a {@code verify} request formatter + an
+ * {@code identity} response mapper for {@code opaque}, or {@code jwks_url}/
+ * {@code issuer}/{@code audience}/{@code identity} for {@code jwt}).
+ *
+ * <p>Per-site with a master-site fallback, {@code alias} unique per site. No FK to
+ * a users table — a provider resolves an external subject that may have no local
+ * row (see {@code workflow_logs.external_user_id}).
+ */
 @Entity
-@Table(name = "workflows", uniqueConstraints = @UniqueConstraint(columnNames = {"site_id", "alias"}))
+@Table(name = "workflow_sso_providers",
+        uniqueConstraints = @UniqueConstraint(name = "workflow_sso_providers_site_alias_unique",
+                columnNames = {"site_id", "alias"}))
 @SQLRestriction("deleted_at is null") // Laravel soft deletes
-public class Workflow {
+public class WorkflowSsoProvider {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,32 +35,32 @@ public class Workflow {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String alias;
 
     @Column(columnDefinition = "text")
     private String description;
 
-    @Column(name = "auth_required")
-    private boolean authRequired = false;
+    /** {@code opaque} (introspection call) or {@code jwt} (local JWKS verify). */
+    @Column(nullable = false)
+    private String driver = "opaque";
 
-    /**
-     * Optional per-workflow SSO provider pin (alias). When null, identity is
-     * resolved by the site's default provider; when set to a provider alias, that
-     * provider is used; the reserved value {@code @none} ignores SSO entirely
-     * (local login only). See {@code SsoIdentityResolver}.
-     */
-    @Column(name = "sso_provider_alias")
-    private String ssoProviderAlias;
-
-    /** Fully-qualified class name of a WorkflowHandler for code-based workflows. */
-    private String handler;
+    @Column(nullable = false)
+    private boolean enabled = true;
 
     @Column(columnDefinition = "text")
     @Convert(converter = JsonSupport.MapConverter.class)
     private Map<String, Object> config;
 
-    @Column(name = "publish_status")
+    /** {@code reject} (401 on invalid token) or {@code anonymous} (run unauthenticated). */
+    @Column(name = "on_failure", nullable = false)
+    private String onFailure = "reject";
+
+    /** Seconds to cache a verified token (opaque driver). */
+    @Column(name = "cache_ttl", nullable = false)
+    private int cacheTtl = 300;
+
+    @Column(name = "publish_status", nullable = false)
     private boolean publishStatus = true;
 
     @Column(name = "insert_by")
@@ -87,14 +101,16 @@ public class Workflow {
     public void setAlias(String alias) { this.alias = alias; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public boolean isAuthRequired() { return authRequired; }
-    public void setAuthRequired(boolean authRequired) { this.authRequired = authRequired; }
-    public String getSsoProviderAlias() { return ssoProviderAlias; }
-    public void setSsoProviderAlias(String ssoProviderAlias) { this.ssoProviderAlias = ssoProviderAlias; }
-    public String getHandler() { return handler; }
-    public void setHandler(String handler) { this.handler = handler; }
+    public String getDriver() { return driver; }
+    public void setDriver(String driver) { this.driver = driver; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public Map<String, Object> getConfig() { return config; }
     public void setConfig(Map<String, Object> config) { this.config = config; }
+    public String getOnFailure() { return onFailure; }
+    public void setOnFailure(String onFailure) { this.onFailure = onFailure; }
+    public int getCacheTtl() { return cacheTtl; }
+    public void setCacheTtl(int cacheTtl) { this.cacheTtl = cacheTtl; }
     public boolean isPublishStatus() { return publishStatus; }
     public void setPublishStatus(boolean publishStatus) { this.publishStatus = publishStatus; }
     public Long getInsertBy() { return insertBy; }

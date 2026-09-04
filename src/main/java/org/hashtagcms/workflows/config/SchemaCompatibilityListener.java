@@ -21,7 +21,7 @@ public class SchemaCompatibilityListener implements ApplicationListener<Applicat
 
     /** Tables the library maps and therefore validates in shared mode. */
     static final String REQUIRED_TABLES =
-            "workflows, workflow_logs, workflow_directives, users, personal_access_tokens";
+            "workflows, workflow_logs, workflow_directives, workflow_sso_providers, users, personal_access_tokens";
 
     @Override
     public void onApplicationEvent(ApplicationFailedEvent event) {

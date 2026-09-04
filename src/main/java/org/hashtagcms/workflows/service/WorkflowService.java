@@ -1,12 +1,15 @@
 package org.hashtagcms.workflows.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hashtagcms.workflows.config.WorkflowProperties;
 import org.hashtagcms.workflows.engine.*;
 import org.hashtagcms.workflows.model.Workflow;
 import org.hashtagcms.workflows.model.WorkflowLog;
 import org.hashtagcms.workflows.repository.WorkflowLogRepository;
 import org.hashtagcms.workflows.repository.WorkflowRepository;
+import org.hashtagcms.workflows.security.SsoIdentityResolver;
 import org.hashtagcms.workflows.security.UnauthorizedException;
+import org.hashtagcms.workflows.security.WorkflowIdentity;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +25,12 @@ public class WorkflowService {
     private final WorkflowHandlerRegistry handlers;
     private final WorkflowProperties properties;
     private final ApplicationContext context;
+    private final SsoIdentityResolver ssoResolver;
 
     public WorkflowService(WorkflowRepository workflows, WorkflowLogRepository logs, WorkflowEngine engine,
                            DirectiveNegotiator negotiator, WorkflowHandlerRegistry handlers,
-                           WorkflowProperties properties, ApplicationContext context) {
+                           WorkflowProperties properties, ApplicationContext context,
+                           SsoIdentityResolver ssoResolver) {
         this.workflows = workflows;
         this.logs = logs;
         this.engine = engine;
@@ -33,11 +38,32 @@ public class WorkflowService {
         this.handlers = handlers;
         this.properties = properties;
         this.context = context;
+        this.ssoResolver = ssoResolver;
+    }
+
+    /** Backward-compatible entry point for callers without an HTTP request (jobs, tests). */
+    public WorkflowResponse execute(String alias, Map<String, Object> payload, long siteId,
+                                    String platform, String appVersion, List<String> capabilities,
+                                    Map<String, Object> user) {
+        return execute(alias, payload, siteId, platform, appVersion, capabilities, user, null);
     }
 
     public WorkflowResponse execute(String alias, Map<String, Object> payload, long siteId,
                                     String platform, String appVersion, List<String> capabilities,
-                                    Map<String, Object> user) {
+                                    Map<String, Object> user, HttpServletRequest request) {
+        return execute(alias, payload, siteId, platform, appVersion, capabilities, user, request, null);
+    }
+
+    /**
+     * @param explicitIdentity a caller-supplied identity that wins over resolution —
+     *                         for server-to-server / queued callers with no HTTP
+     *                         request (mirrors PHP's {@code execute(..., identity:)}).
+     *                         {@code null} = resolve normally.
+     */
+    public WorkflowResponse execute(String alias, Map<String, Object> payload, long siteId,
+                                    String platform, String appVersion, List<String> capabilities,
+                                    Map<String, Object> user, HttpServletRequest request,
+                                    WorkflowIdentity explicitIdentity) {
         long start = System.currentTimeMillis();
         long master = properties.getMasterSiteId();
 
@@ -51,15 +77,39 @@ public class WorkflowService {
             workflow.setSiteId(siteId);
         }
 
-        // Enforce auth_required (the analogue of a gated Sanctum route).
-        if (properties.getAuth().isEnforceRequired() && workflow.isAuthRequired()
-                && (user == null || user.isEmpty())) {
-            throw new UnauthorizedException("Workflow '" + alias + "' requires an authenticated user.");
+        // Resolve who is executing. An explicit identity (passed by a caller that
+        // already knows the user) wins; otherwise, when the SSO module is active a
+        // data-driven provider (honoring the workflow's sso_provider_alias pin)
+        // verifies the caller's token, else the host-resolved local user is used.
+        WorkflowIdentity identity = explicitIdentity != null
+                ? explicitIdentity
+                : (ssoResolver.isModuleActive()
+                    ? ssoResolver.resolve(request, siteId, workflow.getSsoProviderAlias(), user)
+                    : WorkflowIdentity.localUser(user));
+
+        // Enforce authentication before running anything. A presented-but-invalid
+        // credential is always a 401; an auth_required workflow needs *some* resolved
+        // identity. Either way the blocked attempt is still written to workflow_logs
+        // (as unsuccessful), matching the PHP reference, before the 401 is surfaced.
+        String authError = null;
+        if (identity.isFailed()) {
+            authError = "Invalid or expired credentials.";
+        } else if (properties.getAuth().isEnforceRequired() && workflow.isAuthRequired()
+                && !identity.isAuthenticated()) {
+            authError = "Authentication required.";
+        }
+        if (authError != null) {
+            WorkflowResponse blocked = WorkflowResponse.make().setSuccess(false)
+                    .setMessage(authError).toast(authError, "error");
+            writeLog(alias, siteId, payload, blocked, platform, appVersion, null,
+                    System.currentTimeMillis() - start, identity);
+            throw new UnauthorizedException(authError);
         }
 
         WorkflowContext workflowContext = new WorkflowContext(
                 workflow, payload == null ? Map.of() : payload, siteId, platform, appVersion,
-                capabilities == null ? List.of() : capabilities, user == null ? Map.of() : user);
+                capabilities == null ? List.of() : capabilities,
+                identity.getUser(), identity.getClaims(), identity.identityContext());
 
         WorkflowResponse response;
         if (isDeclarative(workflow.getConfig())) {
@@ -84,7 +134,7 @@ public class WorkflowService {
         }
 
         long ms = System.currentTimeMillis() - start;
-        writeLog(alias, siteId, payload, response, platform, appVersion, negotiation, ms, user);
+        writeLog(alias, siteId, payload, response, platform, appVersion, negotiation, ms, identity);
         return response;
     }
 
@@ -110,11 +160,6 @@ public class WorkflowService {
         return null;
     }
 
-    private Long userId(Map<String, Object> user) {
-        if (user == null || user.get("id") == null) return null;
-        try { return Long.parseLong(String.valueOf(user.get("id"))); } catch (NumberFormatException e) { return null; }
-    }
-
     private boolean isDeclarative(Map<String, Object> config) {
         return config != null && (config.containsKey("target") || config.containsKey("directives")
                 || config.containsKey("on_success") || config.containsKey("on_failure")
@@ -123,12 +168,14 @@ public class WorkflowService {
 
     private void writeLog(String alias, long siteId, Map<String, Object> payload, WorkflowResponse response,
                           String platform, String appVersion, DirectiveNegotiator.Result negotiation, long ms,
-                          Map<String, Object> user) {
+                          WorkflowIdentity identity) {
         try {
             WorkflowLog log = new WorkflowLog();
             log.setWorkflowAlias(alias);
             log.setSiteId(siteId);
-            log.setUserId(userId(user));
+            log.setUserId(identity.getUserId());
+            log.setExternalUserId(identity.getExternalUserId());
+            log.setSsoProviderAlias(identity.getProvider());
             log.setPayload(payload);
             log.setResponseDirectives(new ArrayList<>(response.getDirectives()));
             log.setSuccess(response.isSuccess());

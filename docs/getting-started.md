@@ -134,6 +134,15 @@ as REST endpoints:
   alias): `GET /api/hashtagcms/admin/logs?alias=WORKFLOW_LOAD_PHOTOS&page=0&size=25`,
   `GET /api/hashtagcms/admin/logs/{id}`.
 
+## Landing page
+
+Running the standalone app (jar or Docker) and opening `/` in a browser shows a
+small landing page — the live endpoints (with your configured `route-prefix`) and
+links to these guides, rendered in-app at `/docs.html`. It replaces Spring Boot's
+Whitelabel Error Page. It is **off by default** and only served when
+`hashtagcms.workflows.docs.enabled=true` (the standalone/Docker config sets it), so
+embedding this library in another Spring Boot app never claims that app's `/` route.
+
 See [Configuration](configuration.md) for the knobs, [Authentication & SSO](authentication.md)
 for wiring identity, and [Extending](extending.md) for Java handlers, custom
 targets, and directives.

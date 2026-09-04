@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HashtagCMS Workflows (Java)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b1f24; --muted:#5b6570;
+    --line:#e6e9ee; --accent:#2f6feb; --accent-ink:#ffffff;
+    --chip:#eef2f8; --ok:#1a7f4b; --code:#0b1020; --code-ink:#e6e9ef;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d1117; --panel:#151b23; --ink:#e6edf3; --muted:#9aa7b4;
+      --line:#232c37; --accent:#4f8cff; --accent-ink:#0d1117;
+      --chip:#1c2530; --ok:#3fb27f; --code:#0a0e14; --code-ink:#dfe7f0;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 20px 64px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .logo{width:44px;height:44px;border-radius:10px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),#8a4fff);
+    display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px}
+  h1{font-size:24px;margin:0;letter-spacing:-.2px}
+  .sub{color:var(--muted);margin:2px 0 0}
+  .tag{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:999px;
+    background:var(--chip);color:var(--muted);font-size:12.5px;font-weight:600}
+  .lead{margin:20px 0 28px;color:var(--muted);max-width:70ch}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 18px 8px;box-shadow:var(--shadow)}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);margin:0 0 12px}
+  ul.links{list-style:none;margin:0;padding:0}
+  ul.links li{padding:9px 0;border-top:1px solid var(--line)}
+  ul.links li:first-child{border-top:0}
+  .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .row .name{font-weight:600}
+  .row .desc{color:var(--muted);font-size:13px}
+  code{background:var(--chip);padding:1px 6px;border-radius:6px;
+    font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .method{display:inline-block;min-width:38px;text-align:center;font-size:11px;
+    font-weight:700;color:var(--accent);background:var(--chip);border-radius:6px;
+    padding:2px 6px;margin-right:8px}
+  .foot{margin-top:34px;color:var(--muted);font-size:13px}
+  .pill{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">#</div>
+    <div>
+      <h1>HashtagCMS Workflows <span style="color:var(--muted);font-weight:600">(Java)</span></h1>
+      <p class="sub">Headless, server-driven workflow engine — Spring Boot.</p>
+    </div>
+  </header>
+  <span class="tag">API-only · no server-rendered UI</span>
+
+  <p class="lead">
+    This service exposes a declarative workflow engine over a small REST API. A
+    workflow is JSON <code>config</code> (validation → target → success/failure
+    branches with a message, client <em>directives</em>, and data); the engine runs
+    it, interpolates <code>{{ }}</code> tokens, negotiates directives down to what
+    the calling client can render, logs the run, and returns
+    <code>{ success, message, directives, data }</code>. There is no HTML UI — this
+    page is just a signpost to the live endpoints and the docs.
+  </p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Live endpoints</h2>
+      <ul class="links">
+        <li><div class="row"><span class="name"><span class="method">GET</span><a href="{{ROUTE_PREFIX}}/public/workflows/v1/health">health</a></span></div>
+          <div class="desc"><code>{{ROUTE_PREFIX}}/public/workflows/v1/health</code></div></li>
+        <li><div class="row"><span class="name"><span class="method">GET</span><a href="/actuator/health">actuator/health</a></span></div>
+          <div class="desc">DB-aware health, liveness &amp; readiness probes</div></li>
+        <li><div class="row"><span class="name"><span class="method">GET</span><a href="{{ROUTE_PREFIX}}/public/workflows/v1/directives">directives</a></span></div>
+          <div class="desc">The directive capability manifest for a site</div></li>
+        <li><div class="row"><span class="name"><span class="method">GET</span><a href="{{ROUTE_PREFIX}}/public/workflows/v1/catalog">catalog</a></span></div>
+          <div class="desc">Each workflow's alias, inputs &amp; emitted directives</div></li>
+        <li><div class="row"><span class="name"><span class="method">POST</span><span>execute</span></span></div>
+          <div class="desc"><code>{{ROUTE_PREFIX}}/public/workflows/v1/execute</code></div></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Documentation</h2>
+      <ul class="links">
+        <li><div class="row"><span class="name"><a href="/docs.html?doc=getting-started.md">Getting started</a></span></div>
+          <div class="desc">Add the dependency, run your first workflow</div></li>
+        <li><div class="row"><span class="name"><a href="/docs.html?doc=configuration.md">Configuration</a></span></div>
+          <div class="desc">Every <code>hashtagcms.workflows.*</code> property</div></li>
+        <li><div class="row"><span class="name"><a href="/docs.html?doc=authentication.md">Authentication &amp; SSO</a></span></div>
+          <div class="desc">The resolver seam &amp; header/sanctum/jwt drivers</div></li>
+        <li><div class="row"><span class="name"><a href="/docs.html?doc=sso-providers.md">SSO / External-login providers</a></span></div>
+          <div class="desc">Data-driven per-site providers &amp; pins</div></li>
+        <li><div class="row"><span class="name"><a href="/docs.html?doc=docker.md">Docker</a></span></div>
+          <div class="desc">Image, Compose profiles, env vars</div></li>
+        <li><div class="row"><span class="name"><a href="/docs.html">All guides →</a></span></div>
+          <div class="desc">Compatibility, extending, publishing, changelog</div></li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="foot">
+    <span class="pill">● running</span> &nbsp;A faithful port of the PHP package
+    <code>hashtagcms/workflows</code> — same concepts, config shape, directive
+    manifest, and (optionally) the same database.
+  </p>
+</div>
+</body>
+</html>

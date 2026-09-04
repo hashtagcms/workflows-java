@@ -43,6 +43,9 @@ management:
 hashtagcms:
   workflows:
     master-site-id: 1
+    # Enable the docs/links homepage for the standalone runner (hit /)
+    docs:
+      enabled: true
     # Base API route prefix (like PHP's hashtagcmsapi.route_prefix). Public routes
     # live at {route-prefix}/public/workflows/v1, management at {route-prefix}/admin.
     route-prefix: /api/hashtagcms
@@ -52,6 +55,11 @@ hashtagcms:
     install:
       seed-directives: true
       seed-examples: true
+      # Opt-in companion workflow that *obtains* a token from an external login API
+      # (WORKFLOW_LOGIN_TEST). Off by default (targets a specific host); enable it
+      # and point login-test-url at your environment. See docs/sso-providers.md.
+      seed-login-test: false
+      login-test-url: "https://auth.example.com/api/hashtagcms/public/user/v1/login"
     # Egress controls for the `http` target adapter (SSRF hardening). A target's
     # url can interpolate request-supplied {{ payload.* }} values, so restrict it
     # when workflow configs are authored by less-trusted users.

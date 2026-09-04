@@ -7,6 +7,63 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **SSO / external-login provider module (data-driven), matching the PHP package.**
+  A new `workflow_sso_providers` table (per-site with a master-site fallback,
+  `alias` unique per site, `driver`, `enabled`, `on_failure`, `cache_ttl`, and a
+  `config` JSON) that verifies a client credential and resolves it to a workflow
+  identity — no code required:
+  - **`opaque` driver** — introspects the token against the login service by
+    reusing the `http` target adapter (a `config.verify` request block using
+    `{{request.bearer_token}}`, a `config.identity` block mapping
+    `{{response.body.*}}` to `{ user_id, claims }`). Verified tokens are cached
+    per token-hash for `cache_ttl` seconds; failures are never cached.
+  - **`jwt` driver** — verifies the signature locally against the provider's
+    `jwks_url` or shared `secret`, enforces `issuer`/`audience`, and maps
+    `{{token.*}}` to the identity. No per-request introspection call.
+  - **Configurable credential source** — the token is read from
+    `Authorization: Bearer` by default, or from any header via a `credential`
+    block (`{ "header": "authToken", "strip_prefix": "Bearer " }`); a configured
+    header is authoritative (no fallback).
+  - **Per-workflow provider pin** — `workflows.sso_provider_alias` pins a specific
+    provider; the resolver honours it and falls back to the site default
+    (deterministic: site-over-master, then id) when a pin no longer resolves. The
+    reserved value `@none` ignores SSO entirely (local login only).
+  - **`on_failure` policy** — `reject` surfaces a rejected credential as an HTTP
+    **401**; `anonymous` runs the workflow unauthenticated. When no provider is
+    configured for a site, resolution falls back to the host's
+    `WorkflowUserResolver` (local guard), so non-SSO installs are unaffected.
+  - **Identity in the engine** — external subjects log to
+    `workflow_logs.external_user_id` + `sso_provider_alias`, and the provider's
+    claims are available to interpolation as `{{ claims.* }}` and `{{ identity.* }}`
+    (`user_id`, `external_user_id`, `provider`, `raw`).
+  - **Admin REST CRUD** — `GET/POST/PUT/DELETE {route-prefix}/admin/sso-providers`
+    (the API-only replacement for the PHP admin UI), with per-site alias
+    validation. The `shared`-mode schema guard now also validates
+    `workflow_sso_providers`. See [docs/sso-providers.md](docs/sso-providers.md).
+  - **Explicit-identity execution** — `WorkflowService.execute(..., WorkflowIdentity)`
+    lets a requestless caller (queue job / server-to-server) pass an identity that
+    wins over resolution, mirroring PHP's `Workflows::execute(..., identity:)`.
+    `WorkflowIdentity.from(...)` coerces a numeric id / user map / `WorkflowIdentity`.
+  - **Companion login workflow** — the opt-in `WORKFLOW_LOGIN_TEST` seed (a workflow
+    that *obtains* a token from an external login API), enabled via
+    `hashtagcms.workflows.install.seed-login-test` + `install.login-test-url`.
+- **`X-Site-Id` request header** — the execute API now resolves the site from the
+  body `site_id`, else the `X-Site-Id` header, else the master site (PHP parity).
+- **Landing page + in-app docs at `/`** — instead of Spring Boot's Whitelabel Error
+  Page, `/` serves a small signpost page (live endpoints with the configured
+  `route-prefix` substituted in, links to the guides) and `/docs.html` renders the
+  bundled Markdown docs client-side. Gated by `hashtagcms.workflows.docs.enabled`
+  (**off by default** so the library never claims a consumer app's `/` route; **on**
+  in the standalone runner / Docker image). Assets live under
+  `classpath:/workflows-site/` — never `static/` — so nothing is auto-served to
+  library consumers.
+
+### Fixed
+- **Blocked (401) runs are now written to `workflow_logs` (as unsuccessful)** —
+  a rejected credential or an unauthenticated `auth_required` call previously threw
+  before logging, leaving no audit record; it is now logged before the 401 is
+  surfaced, matching the PHP reference. The `auth_required` message is now
+  `"Authentication required."` (was a longer Java-specific string).
 - **Preview (dry-run) API** — `POST {route-prefix}/admin/workflows/preview` runs
   an unsaved `config` through the engine (validation + directive negotiation)
   with no persistence.

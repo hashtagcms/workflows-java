@@ -23,6 +23,14 @@ public class WorkflowLog {
     @Column(name = "user_id")
     private Long userId;
 
+    /** External (SSO) subject id — set when the caller was resolved via an SSO provider. */
+    @Column(name = "external_user_id")
+    private String externalUserId;
+
+    /** Alias of the SSO provider that resolved the identity (null for local/anonymous). */
+    @Column(name = "sso_provider_alias")
+    private String ssoProviderAlias;
+
     @Column(name = "session_id")
     private String sessionId;
 
@@ -74,6 +82,10 @@ public class WorkflowLog {
     public void setSiteId(Long v) { this.siteId = v; }
     public Long getUserId() { return userId; }
     public void setUserId(Long v) { this.userId = v; }
+    public String getExternalUserId() { return externalUserId; }
+    public void setExternalUserId(String v) { this.externalUserId = v; }
+    public String getSsoProviderAlias() { return ssoProviderAlias; }
+    public void setSsoProviderAlias(String v) { this.ssoProviderAlias = v; }
     public String getSessionId() { return sessionId; }
     public void setSessionId(String v) { this.sessionId = v; }
     public Map<String, Object> getPayload() { return payload; }

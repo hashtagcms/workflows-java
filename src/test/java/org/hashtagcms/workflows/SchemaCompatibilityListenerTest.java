@@ -21,7 +21,7 @@ class SchemaCompatibilityListenerTest {
         assertThat(msg)
                 .contains("schema validation FAILED")
                 .contains("ddl-auto=validate")
-                .contains("workflows, workflow_logs, workflow_directives, users, personal_access_tokens")
+                .contains("workflows, workflow_logs, workflow_directives, workflow_sso_providers, users, personal_access_tokens")
                 .contains("SPRING_JPA_HIBERNATE_DDL_AUTO=update")
                 .contains("missing table [workflows]"); // original error preserved
     }

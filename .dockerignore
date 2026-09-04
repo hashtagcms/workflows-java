@@ -5,10 +5,8 @@ target/
 .idea/
 *.iml
 .vscode/
-docs/
 art/
 clients/
-*.md
 Dockerfile
 .dockerignore
 docker-compose.yml

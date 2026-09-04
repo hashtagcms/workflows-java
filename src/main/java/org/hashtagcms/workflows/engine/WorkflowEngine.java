@@ -53,6 +53,8 @@ public class WorkflowEngine {
         ctx.put("site", Map.of("id", context.getSiteId()));
         ctx.put("platform", context.getPlatform());
         ctx.put("user", context.getUser() == null ? Map.of() : context.getUser());
+        ctx.put("claims", context.getClaims() == null ? Map.of() : context.getClaims());
+        ctx.put("identity", context.getIdentity() == null ? Map.of() : context.getIdentity());
         ctx.put("config", config);
         ctx.put("workflow", Map.of(
                 "id", context.getWorkflow().getId() == null ? 0 : context.getWorkflow().getId(),
