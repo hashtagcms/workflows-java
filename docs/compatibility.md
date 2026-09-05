@@ -5,11 +5,11 @@ current value, and what a bump implies.
 
 | Axis | Current | What it is | Bumped when |
 |---|---|---|---|
-| **Java library** | `org.hashtagcms:workflows` **1.0.0** | The Maven artifact / Docker image tag. | Any release of this project (SemVer). |
+| **Java library** | `org.hashtagcms:workflows` **1.0.1** | The Maven artifact / Docker image tag. | Any release of this project (SemVer). |
 | **PHP reference** | `hashtagcms/workflows` (matching release) | The reference implementation this port tracks; both share the DB schema + directive manifest. | Released in lockstep with the Java library (see [parity guard](../src/test/java/org/hashtagcms/workflows/DirectiveManifestParityTest.java)). |
 | **HTTP API** | **v1** (`/public/workflows/v1`) | The public REST contract (paths + request/response envelope). | Only on a breaking API change → a new `/v2` path (v1 kept). |
 | **Config schema** | **1.0** (`config.version`) | The declarative workflow-config shape (`validation` / `target` / `on_success` / `on_failure` / `directives` / `data`). Advisory today — the engine does not branch on it; it marks the shape for forward compatibility. | On a breaking config-shape change. |
-| **Directive manifest** | **72 directives** (ships with lib 1.0.0) | The catalogue of directive types + per-platform support + fallbacks. Not separately numbered — it moves with the library version. | Whenever directives are added/changed (a library release). |
+| **Directive manifest** | **72 directives** (ships with lib 1.0.1) | The catalogue of directive types + per-platform support + fallbacks. Not separately numbered — it moves with the library version. | Whenever directives are added/changed (a library release). |
 
 ## Java ↔ PHP
 

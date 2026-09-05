@@ -6,7 +6,7 @@
 # exact version and `latest`, and pushes to Docker Hub under `hashtagcms/workflows-java`.
 #
 # Usage:
-#   ./docker/build-and-push.sh                 # build + push :1.0.0 and :latest
+#   ./docker/build-and-push.sh                 # build + push :1.0.1 and :latest
 #   VERSION=1.2.0 ./docker/build-and-push.sh   # a specific version
 #   IMAGE=you/workflows ./docker/build-and-push.sh
 #   PUSH=false ./docker/build-and-push.sh      # build a local single-arch image only, no push

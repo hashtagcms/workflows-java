@@ -7,8 +7,8 @@
 # HEALTHCHECK. Runs standalone out of the box on in-memory H2, or point it at a
 # shared MySQL/Postgres via env vars (see `docker-compose.yml` / `.env.example`).
 #
-# Build locally:   docker build -t hashtagcms/workflows-java:1.0.0 .
-# Run locally:     docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
+# Build locally:   docker build -t hashtagcms/workflows-java:1.0.1 .
+# Run locally:     docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.1
 # Multi-arch push: see docker/build-and-push.sh
 # =============================================================================
 
@@ -54,7 +54,7 @@ COPY --from=build /workspace/app.jar app.jar
 USER app
 
 # OCI image metadata (overridable at build time: --build-arg VERSION=...).
-ARG VERSION=1.0.0
+ARG VERSION=1.0.1
 LABEL org.opencontainers.image.title="HashtagCMS Workflows (Java)" \
       org.opencontainers.image.description="Server-driven workflow & action orchestration engine — Spring Boot, API only." \
       org.opencontainers.image.version="${VERSION}" \

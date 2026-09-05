@@ -37,14 +37,14 @@ Add the dependency (JDBC driver is yours to choose):
 <dependency>
   <groupId>org.hashtagcms</groupId>
   <artifactId>workflows</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```groovy
-implementation 'org.hashtagcms:workflows:1.0.0'
+implementation 'org.hashtagcms:workflows:1.0.1'
 ```
 
 The artifact is on **Maven Central** — no extra repository config needed. Add a
@@ -88,12 +88,12 @@ No global Maven needed — the **Maven Wrapper** (`./mvnw`) downloads it on firs
 ```bash
 ./mvnw spring-boot:run
 # or build the runnable jar (attached under the `exec` classifier):
-./mvnw clean package && java -jar target/workflows-1.0.0-exec.jar
+./mvnw clean package && java -jar target/workflows-1.0.1-exec.jar
 ```
 
 On startup it seeds the **72-directive manifest** and a few **example workflows**
 (H2). The service listens on `http://localhost:8080`. (The plain
-`target/workflows-1.0.0.jar` is the library artifact consumers depend on;
+`target/workflows-1.0.1.jar` is the library artifact consumers depend on;
 the `-exec.jar` is the self-contained runnable one.)
 
 ## Run with Docker
@@ -104,8 +104,8 @@ The image is published to **Docker Hub** as `hashtagcms/workflows-java` (also on
 out of the box — nothing else to install.
 
 ```bash
-docker pull hashtagcms/workflows-java:1.0.0
-docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
+docker pull hashtagcms/workflows-java:1.0.1
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.1
 # then:  curl http://localhost:8080/api/hashtagcms/public/workflows/v1/health
 ```
 
@@ -118,14 +118,14 @@ docker run --rm -p 8080:8080 \
   -e SPRING_DATASOURCE_URL='jdbc:mysql://db-host:3306/workflows?useSSL=false&allowPublicKeyRetrieval=true' \
   -e SPRING_DATASOURCE_USERNAME=workflows -e SPRING_DATASOURCE_PASSWORD=secret \
   -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
-  hashtagcms/workflows-java:1.0.0
+  hashtagcms/workflows-java:1.0.1
 
 # Or alongside the PHP app, on the tables PHP owns (validate-only, no seeding):
 docker run --rm -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=shared \
   -e DB_URL='jdbc:mysql://host.docker.internal:3306/v30?useSSL=false&allowPublicKeyRetrieval=true' \
   -e DB_USERNAME=root -e DB_PASSWORD=secret \
-  hashtagcms/workflows-java:1.0.0
+  hashtagcms/workflows-java:1.0.1
 ```
 
 Or build and run it from source with Compose. It connects to a MySQL you already

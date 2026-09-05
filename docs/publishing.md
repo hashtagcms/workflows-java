@@ -52,7 +52,7 @@ and a `release` profile that builds signed sources + Javadoc jars and publishes.
 1. Set a release version (drop `-SNAPSHOT`):
 
    ```bash
-   ./mvnw versions:set -DnewVersion=1.0.0
+   ./mvnw versions:set -DnewVersion=1.0.1
    ```
 
 2. Build, sign, and publish:
@@ -70,7 +70,7 @@ and a `release` profile that builds signed sources + Javadoc jars and publishes.
 3. Tag and prepare the next iteration:
 
    ```bash
-   git tag v1.0.0 && git push --tags
+   git tag v1.0.1 && git push --tags
    ./mvnw versions:set -DnewVersion=1.1.0-SNAPSHOT
    ```
 

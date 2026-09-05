@@ -6,6 +6,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-09-05
+
+Version-matched to the PHP reference `hashtagcms/workflows` **v1.0.1** (same SSO /
+external-login feature set).
+
 ### Added
 - **SSO / external-login provider module (data-driven), matching the PHP package.**
   A new `workflow_sso_providers` table (per-site with a master-site fallback,
@@ -161,5 +166,6 @@ HashtagCMS server-driven workflow engine to Java (API only).
   engine wires itself; every bean is overridable (`@ConditionalOnMissingBean`).
 - Env interpolation (`{{ env.KEY }}`) resolved through Spring's `Environment`.
 
-[Unreleased]: https://github.com/hashtagcms/workflows-java/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/hashtagcms/workflows-java/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/hashtagcms/workflows-java/releases/tag/v1.0.1
 [1.0.0]: https://github.com/hashtagcms/workflows-java/releases/tag/v1.0.0

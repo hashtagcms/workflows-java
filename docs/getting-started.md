@@ -10,14 +10,14 @@
 <dependency>
   <groupId>org.hashtagcms</groupId>
   <artifactId>workflows</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 **Gradle**
 
 ```groovy
-implementation 'org.hashtagcms:workflows:1.0.0'
+implementation 'org.hashtagcms:workflows:1.0.1'
 ```
 
 You also need a JDBC driver on the classpath (the library ships none — it's the

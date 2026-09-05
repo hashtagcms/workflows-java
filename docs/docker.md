@@ -19,18 +19,18 @@ environment variables.
 
 | Registry | Image | Pull |
 |---|---|---|
-| **Docker Hub** (primary) | `hashtagcms/workflows-java` | `docker pull hashtagcms/workflows-java:1.0.0` |
-| **GitHub Container Registry** | `ghcr.io/hashtagcms/workflows-java` | `docker pull ghcr.io/hashtagcms/workflows-java:1.0.0` |
+| **Docker Hub** (primary) | `hashtagcms/workflows-java` | `docker pull hashtagcms/workflows-java:1.0.1` |
+| **GitHub Container Registry** | `ghcr.io/hashtagcms/workflows-java` | `docker pull ghcr.io/hashtagcms/workflows-java:1.0.1` |
 
-**Tags:** each release is published as its exact version (e.g. `1.0.0`) and as
+**Tags:** each release is published as its exact version (e.g. `1.0.1`) and as
 `latest`. **Pin the exact version in production**; use `latest` only for quick
 trials. The version tag always matches the Maven artifact version and the Git tag.
 
 ## Pull & run
 
 ```bash
-docker pull hashtagcms/workflows-java:1.0.0
-docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
+docker pull hashtagcms/workflows-java:1.0.1
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.1
 ```
 
 Verify it:
@@ -101,7 +101,7 @@ docker run --rm -p 8080:8080 \
   -e SPRING_DATASOURCE_PASSWORD=secret \
   -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
   -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
-  hashtagcms/workflows-java:1.0.0
+  hashtagcms/workflows-java:1.0.1
 ```
 
 ### 2. Alongside the PHP app (shared, PHP-owned schema)
@@ -116,7 +116,7 @@ docker run --rm -p 8080:8080 \
   -e DB_URL='jdbc:mysql://db-host:3306/v30?useSSL=false&allowPublicKeyRetrieval=true' \
   -e DB_USERNAME=root \
   -e DB_PASSWORD=secret \
-  hashtagcms/workflows-java:1.0.0
+  hashtagcms/workflows-java:1.0.1
 ```
 
 Reaching a database on the **host** from inside the container: use
@@ -175,8 +175,8 @@ Everything is driven by env vars — Spring relaxed binding maps `SPRING_...` an
 ## Build the image yourself
 
 ```bash
-docker build -t hashtagcms/workflows-java:1.0.0 .
-docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.0
+docker build -t hashtagcms/workflows-java:1.0.1 .
+docker run --rm -p 8080:8080 hashtagcms/workflows-java:1.0.1
 ```
 
 The build is a two-stage Dockerfile: stage one compiles the runnable `-exec.jar`
@@ -196,7 +196,7 @@ add the library and bring your own JDBC driver:
 <dependency>
   <groupId>org.hashtagcms</groupId>
   <artifactId>workflows</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 <!-- your database driver, e.g. PostgreSQL -->
 <dependency>
